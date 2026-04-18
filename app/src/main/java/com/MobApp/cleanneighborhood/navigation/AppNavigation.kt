@@ -9,18 +9,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -32,10 +27,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.MobApp.cleanneighborhood.ui.auth.AuthViewModel
+import com.MobApp.cleanneighborhood.ui.auth.LoginScreen
+import com.MobApp.cleanneighborhood.ui.auth.RegisterScreen
 import com.MobApp.cleanneighborhood.ui.catalog.CatalogScreen
 import com.MobApp.cleanneighborhood.ui.home.HomeScreen
 import com.MobApp.cleanneighborhood.ui.map.MapScreen
@@ -49,6 +49,8 @@ object Routes {
     const val MAP = "map"
     const val CATALOG = "catalog"
     const val PROFILE = "profile"
+    const val LOGIN = "login"
+    const val REGISTER = "register"
 }
 
 data class NavItem(
@@ -77,7 +79,6 @@ fun NavTextButton(
     Text(
         text = label,
         color = textColor,
-        // 15 / 1.5 = 10.sp
         fontSize = 12.sp,
         fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
         modifier = Modifier
@@ -91,9 +92,16 @@ fun NavTextButton(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    viewModel: AuthViewModel = hiltViewModel()
+) {
+    val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle(
+        initialValue = false
+    )
+
+    val startDestination = if (isLoggedIn) Routes.HOME else Routes.LOGIN
+
     val navController = rememberNavController()
 
     val navItems = listOf(
@@ -102,12 +110,21 @@ fun AppNavigation() {
         NavItem(route = Routes.CATALOG, label = "Каталог")
     )
 
+    // Теперь currentRoute объявлен ПОСЛЕ navController
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    // Список экранов где TopBar скрыт
+    val screensWithoutTopBar = listOf(
+        Routes.PROFILE,
+        Routes.LOGIN,
+        Routes.REGISTER
+    )
+
     Scaffold(
         topBar = {
-            if (currentRoute != Routes.PROFILE) {
+            // Проверка здесь — currentRoute уже объявлен выше
+            if (currentRoute !in screensWithoutTopBar) {
 
                 val isProfileActive = currentRoute == Routes.PROFILE
 
@@ -121,14 +138,11 @@ fun AppNavigation() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White)
-                        // Тень снизу
                         .shadow(elevation = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Центральные кнопки — занимают всё место кроме иконки
                     Row(
-                        modifier = Modifier
-                            .weight(1f),
+                        modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -151,13 +165,12 @@ fun AppNavigation() {
                         }
                     }
 
-                    // Иконка профиля справа
                     Icon(
                         painter = painterResource(id = R.drawable.ic_profile_default),
                         contentDescription = "Профиль",
                         modifier = Modifier
-                            .padding(top = 6.dp)
-                            .size(60.dp)
+                            .padding(end = 12.dp)
+                            .size(22.dp)
                             .scale(profileScale)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
@@ -172,11 +185,11 @@ fun AppNavigation() {
                     )
                 }
             }
-        },
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Routes.HOME
+            startDestination = startDestination
         ) {
             composable(Routes.HOME) {
                 HomeScreen(paddingValues = innerPadding)
@@ -189,6 +202,34 @@ fun AppNavigation() {
             }
             composable(Routes.PROFILE) {
                 ProfileScreen(paddingValues = innerPadding)
+            }
+            composable(Routes.LOGIN) {
+                LoginScreen(
+                    onNavigateToRegister = {
+                        navController.navigate(Routes.REGISTER) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToHome = {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable(Routes.REGISTER) {
+                RegisterScreen(
+                    onNavigateToLogin = {
+                        navController.navigate(Routes.LOGIN) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToHome = {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
+                    }
+                )
             }
         }
     }
