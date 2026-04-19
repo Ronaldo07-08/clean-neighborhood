@@ -9,10 +9,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +29,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -88,7 +93,7 @@ fun NavTextButton(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     )
 }
 
@@ -110,11 +115,9 @@ fun AppNavigation(
         NavItem(route = Routes.CATALOG, label = "Каталог")
     )
 
-    // Теперь currentRoute объявлен ПОСЛЕ navController
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Список экранов где TopBar скрыт
     val screensWithoutTopBar = listOf(
         Routes.PROFILE,
         Routes.LOGIN,
@@ -123,7 +126,6 @@ fun AppNavigation(
 
     Scaffold(
         topBar = {
-            // Проверка здесь — currentRoute уже объявлен выше
             if (currentRoute !in screensWithoutTopBar) {
 
                 val isProfileActive = currentRoute == Routes.PROFILE
@@ -138,9 +140,31 @@ fun AppNavigation(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White)
-                        .shadow(elevation = 4.dp),
+                        .shadow(elevation = 4.dp)
+                        // Отступ сверху чтобы не перекрывался статус-баром
+                        .statusBarsPadding()
+                        // Увеличиваем высоту панели
+                        .height(56.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
+                    Column (modifier = Modifier
+                        .padding(start = 12.dp)) {
+                        Icon(painter = painterResource(id = R.drawable.ic_logo),
+                            contentDescription = "Логотип",
+                            modifier = Modifier.size(28.dp),
+                            tint = Color.Unspecified)
+                        Text(
+                            text = "ЧИСТЫЙ\nКВАРТАЛ",
+                            fontSize = 7.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = ActiveColor,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 8.sp
+                        )
+                    }
+
+                    // Три текстовые кнопки по центру
                     Row(
                         modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.Center,
@@ -165,12 +189,10 @@ fun AppNavigation(
                         }
                     }
 
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_profile_default),
-                        contentDescription = "Профиль",
+                    // Логотип справа — иконка + текст
+                    Column(
                         modifier = Modifier
                             .padding(end = 12.dp)
-                            .size(22.dp)
                             .scale(profileScale)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
@@ -181,8 +203,16 @@ fun AppNavigation(
                                     }
                                 }
                             ),
-                        tint = Color.Unspecified
-                    )
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_profile_default),
+                            contentDescription = "Профиль",
+                            modifier = Modifier.size(52.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
                 }
             }
         }

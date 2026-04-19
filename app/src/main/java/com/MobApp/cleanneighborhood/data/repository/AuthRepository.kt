@@ -102,6 +102,69 @@ class AuthRepository @Inject constructor(
     suspend fun logout() {
         tokenManager.clearTokens()
     }
+    //-----------------------------МОКИ ЗАПРОСОВ------------------------
+    suspend fun loginMock(
+        login: String,
+        password: String,
+        rememberMe: Boolean
+    ): AuthResult<AuthResponse> {
+        return try {
+            // TODO: заменить на реальный запрос когда бэкендер поднимет сервер
+            // val response = apiService.login(LoginRequest(login, password))
+
+            // MOCK — симулируем успешный ответ
+            val mockResponse = AuthResponse(
+                accessToken = "mock_access_token",
+                refreshToken = "mock_refresh_token",
+                userId = "mock_user_id",
+                login = login,
+                email = ""
+            )
+            tokenManager.saveTokens(
+                accessToken = mockResponse.accessToken,
+                refreshToken = mockResponse.refreshToken,
+                userId = mockResponse.userId,
+                login = mockResponse.login,
+                rememberMe = rememberMe
+            )
+            AuthResult.Success(mockResponse)
+
+        } catch (e: Exception) {
+            AuthResult.Error("Ошибка: ${e.localizedMessage}")
+        }
+    }
+
+    suspend fun registerMock(
+        login: String,
+        email: String,
+        password: String
+    ): AuthResult<AuthResponse> {
+        return try {
+            // TODO: заменить на реальный запрос когда бэкендер поднимет сервер
+            // val response = apiService.register(RegisterRequest(login, email, password))
+
+            // MOCK — симулируем успешный ответ
+            val mockResponse = AuthResponse(
+                accessToken = "mock_access_token",
+                refreshToken = "mock_refresh_token",
+                userId = "mock_user_id",
+                login = login,
+                email = email
+            )
+            tokenManager.saveTokens(
+                accessToken = mockResponse.accessToken,
+                refreshToken = mockResponse.refreshToken,
+                userId = mockResponse.userId,
+                login = mockResponse.login,
+                rememberMe = false
+            )
+            AuthResult.Success(mockResponse)
+
+        } catch (e: Exception) {
+            AuthResult.Error("Ошибка: ${e.localizedMessage}")
+        }
+    }
+    //-------------------------------------------------------------
 
     // Проверка — залогинен ли пользователь
     // Используется при старте приложения
