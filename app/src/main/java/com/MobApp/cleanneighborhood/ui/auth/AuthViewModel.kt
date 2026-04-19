@@ -50,7 +50,7 @@ class AuthViewModel @Inject constructor(
             // Показываем загрузку
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val result = authRepository.login(
+            val result = authRepository.loginMock( // ПОМЕНЯТЬ МОК НА РЕАЛИЗАЦИЮ
                 login = login,
                 password = password,
                 rememberMe = rememberMe
@@ -117,7 +117,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val result = authRepository.register(
+            val result = authRepository.registerMock( //ПОМЕНЯТЬ МОК НА РЕАЛИЗАЦИЮ
                 login = login,
                 email = email,
                 password = password
