@@ -5,13 +5,16 @@ import com.MobApp.cleanneighborhood.R
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -102,10 +105,15 @@ fun AppNavigation(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle(
-        initialValue = false
+        initialValue = null
     )
+    // Пока не знаем состояние — показываем заглушку
+    if (isLoggedIn == null) {
+        SplashScreen()
+        return
+    }
 
-    val startDestination = if (isLoggedIn) Routes.HOME else Routes.LOGIN
+    val startDestination = if (isLoggedIn == true) Routes.HOME else Routes.LOGIN
 
     val navController = rememberNavController()
 
@@ -222,7 +230,23 @@ fun AppNavigation(
             startDestination = startDestination
         ) {
             composable(Routes.HOME) {
-                HomeScreen(paddingValues = innerPadding)
+                HomeScreen(
+                    paddingValues = innerPadding,
+                    onNavigateToMap = {
+                        navController.navigate(Routes.MAP) {
+                            popUpTo(Routes.HOME) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToCatalog = {
+                        navController.navigate(Routes.CATALOG) {
+                            popUpTo(Routes.HOME) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(Routes.MAP) {
                 MapScreen(paddingValues = innerPadding)
@@ -261,6 +285,40 @@ fun AppNavigation(
                     }
                 )
             }
+        }
+    }
+}
+@Composable
+fun SplashScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_logo),
+                contentDescription = null,
+                modifier = Modifier.size(80.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "ЧИСТЫЙ",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF609432),
+                letterSpacing = 2.sp
+            )
+            Text(
+                text = "КВАРТАЛ",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF609432),
+                letterSpacing = 2.sp
+            )
         }
     }
 }

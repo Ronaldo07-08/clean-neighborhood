@@ -17,8 +17,13 @@ ksp = "2.1.20-1.0.32"
 datastore = "1.1.7"
 coil = "2.7.0"
 foundationLayout = "1.10.6"
+yandexMaps = "4.6.1-full"
+foundation = "1.10.6"
 
 [libraries]
+#Yandex Maps
+yandex-maps = { group = "com.yandex.android", name = "maps.mobile", version.ref = "yandexMaps" }
+
 # Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -60,6 +65,7 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
